@@ -47,9 +47,9 @@ function M.logger_run()
     local member_text = ts_utils.get_node_text(parent)[1]
 
     -- If the member expression node is of the form `this.field_name`, replace it with just `field_name`
-    if member_text:sub(1, 5) == 'this.' then
-      member_text = member_text:sub(6)
-    end
+    -- if member_text:sub(1, 5) == 'this.' then
+    --   member_text = member_text:sub(6)
+    -- end
 
     -- Add the member text to the console.log statement
     text = member_text .. '.' .. text
