@@ -31,6 +31,10 @@ function M.logger_run()
     parent_node = parent_node:parent()
   end
 
+  if not var_name_node then
+    return
+  end
+
   -- build the console log statement
   local console_log = "console.log('🛠  " ..
       line ..
