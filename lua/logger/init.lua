@@ -8,18 +8,31 @@ function M.logger_run()
     return
   end
 
+  local ts_utils = require("nvim-treesitter.ts_utils")
+
   local line = vim.fn.line('.')
   local col = vim.fn.col('.')
   local full_buffer_name = vim.api.nvim_buf_get_name(0)
   local buffer_name = vim.fn.fnamemodify(full_buffer_name, ":t")
 
-  local ts_utils = require("nvim-treesitter.ts_utils")
   local node = ts_utils.get_node_at_cursor()
-
   local var_node = ts_utils.get_previous_node_with_same_type(node, { "identifier" })
 
   if var_node ~= nil then
-    return ts_utils.get_node_text(var_node)[1]
+    local var_path = ts_utils.get_node_text(var_node)[1]
+    local parent_node = var_node
+
+    while parent_node ~= nil do
+      if parent_node:type() == "class_declaration" or parent_node:type() == "function_declaration" then
+        var_path = ts_utils.get_node_text(parent_node)[1] .. "." .. var_path
+      elseif parent_node:type() == "table" then
+        var_path = ts_utils.get_node_text(parent_node.parent)[1] .. "." .. var_path
+      end
+
+      parent_node = parent_node:parent()
+    end
+
+    return var_path
   end
 
   -- build the console log statement
