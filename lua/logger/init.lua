@@ -1,3 +1,4 @@
+local ts_utils = require('nvim-treesitter.ts_utils')
 local M = {}
 
 function M.logger_run()
@@ -14,30 +15,19 @@ function M.logger_run()
   local full_buffer_name = vim.api.nvim_buf_get_name(0)
   local buffer_name = vim.fn.fnamemodify(full_buffer_name, ":t")
 
-  local ts_utils = require('nvim-treesitter.ts_utils')
-
   local node = ts_utils.get_node_at_cursor()
-  local parent_node = node:parent()
-  local var_name_node = parent_node:child(1)
 
-  -- Traverse up the AST until we find a variable declaration or reference
-  while parent_node do
-    if parent_node:type() == 'variable_declaration' or parent_node:type() == 'variable_reference' then
-      var_name_node = parent_node:child(1)
-
-      return
-    end
-
-    parent_node = parent_node:parent()
+  if node:type() == 'identifier' then
+    print(node:get_text())
+  else
+    print('No variable name under cursor')
+    return
   end
 
-  print(var_name_node)
-  print(var_name_node:text())
-
   -- build the console log statement
-  -- local console_log = "console.log('🛠  " ..
-  --     line ..
-  --     ":" .. col .. " " .. buffer_name .. " -> " .. var_name_node .. ": ', " .. var_name_node .. ");"
+  local console_log = "console.log('🛠  " ..
+      line ..
+      ":" .. col .. " " .. buffer_name .. " -> " .. var_name_node .. ": ', " .. var_name_node .. ");"
 
   -- go to the end of the current line
   vim.api.nvim_command("normal! $")
