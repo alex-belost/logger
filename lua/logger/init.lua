@@ -52,7 +52,8 @@ function M.logger_run()
     -- end
 
     -- Add the member text to the console.log statement
-    text = member_text .. '.' .. text
+    -- text = member_text .. '.' .. text
+    text = member_text
   end
 
   -- Create the console.log statement
