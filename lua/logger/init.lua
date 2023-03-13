@@ -8,36 +8,33 @@ function M.logger_run()
     return
   end
 
-  local ts_utils = require("nvim-treesitter.ts_utils")
 
   local line = vim.fn.line('.')
   local col = vim.fn.col('.')
   local full_buffer_name = vim.api.nvim_buf_get_name(0)
   local buffer_name = vim.fn.fnamemodify(full_buffer_name, ":t")
 
+  local ts_utils = require('nvim-treesitter.ts_utils')
+
   local node = ts_utils.get_node_at_cursor()
-  local var_node = ts_utils.get_previous_node_with_same_type(node, { "identifier" })
+  local parent_node = node:parent()
+  local var_name_node = parent_node:child(1)
 
-  if var_node ~= nil then
-    local var_path = ts_utils.get_node_text(var_node)[1]
-    local parent_node = var_node
+  -- Traverse up the AST until we find a variable declaration or reference
+  while parent_node do
+    if parent_node:type() == 'variable_declaration' or parent_node:type() == 'variable_reference' then
+      var_name_node = parent_node:child(1)
 
-    while parent_node ~= nil do
-      if parent_node:type() == "class_declaration" or parent_node:type() == "function_declaration" then
-        var_path = ts_utils.get_node_text(parent_node)[1] .. "." .. var_path
-      elseif parent_node:type() == "table" then
-        var_path = ts_utils.get_node_text(parent_node.parent)[1] .. "." .. var_path
-      end
-
-      parent_node = parent_node:parent()
+      return
     end
 
-    return var_path
+    parent_node = parent_node:parent()
   end
 
   -- build the console log statement
   local console_log = "console.log('🛠  " ..
-      line .. ":" .. col .. " " .. buffer_name .. " -> " .. var_node .. ": ', " .. var_node .. ");"
+      line ..
+      ":" .. col .. " " .. buffer_name .. " -> " .. var_name_node:text() .. ": ', " .. var_name_node:text() .. ");"
 
   -- go to the end of the current line
   vim.api.nvim_command("normal! $")
