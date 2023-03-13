@@ -17,17 +17,12 @@ function M.logger_run()
 
   local node = ts_utils.get_node_at_cursor()
 
-  if node:type() == 'identifier' then
-    print(node:get_text())
-  else
-    print('No variable name under cursor')
-    return
-  end
+  print(node:type())
+
 
   -- build the console log statement
   local console_log = "console.log('🛠  " ..
-      line ..
-      ":" .. col .. " " .. buffer_name .. " -> " .. var_name_node .. ": ', " .. var_name_node .. ");"
+      line .. ":" .. col .. " " .. buffer_name .. " -> " .. node .. ": ', " .. node .. ");"
 
   -- go to the end of the current line
   vim.api.nvim_command("normal! $")
